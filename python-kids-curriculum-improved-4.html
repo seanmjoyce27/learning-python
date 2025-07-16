@@ -456,6 +456,99 @@
         // Store CodeMirror instances
         const editors = {};
         
+        // Progress tracking with local storage
+        const PROGRESS_KEY = 'python-kids-progress';
+        let lessonProgress = {
+            completedLessons: new Set(),
+            completedQuizzes: new Set(),
+            lastActiveTab: 'welcome',
+            sessionProgress: new Set() // Track completions in current session
+        };
+        
+        // Load progress from localStorage
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem(PROGRESS_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    lessonProgress.completedLessons = new Set(parsed.completedLessons || []);
+                    lessonProgress.completedQuizzes = new Set(parsed.completedQuizzes || []);
+                    lessonProgress.lastActiveTab = parsed.lastActiveTab || 'welcome';
+                    lessonProgress.sessionProgress = new Set(); // Always start fresh for session
+                }
+            } catch (e) {
+                console.log('Error loading progress:', e);
+            }
+        }
+        
+        // Save progress to localStorage
+        function saveProgress() {
+            try {
+                const toSave = {
+                    completedLessons: Array.from(lessonProgress.completedLessons),
+                    completedQuizzes: Array.from(lessonProgress.completedQuizzes),
+                    lastActiveTab: lessonProgress.lastActiveTab
+                };
+                localStorage.setItem(PROGRESS_KEY, JSON.stringify(toSave));
+            } catch (e) {
+                console.log('Error saving progress:', e);
+            }
+        }
+        
+        // Mark lesson as completed (only if completed in this session)
+        function markLessonCompleted(lessonId) {
+            if (lessonProgress.sessionProgress.has(lessonId)) {
+                lessonProgress.completedLessons.add(lessonId);
+                saveProgress();
+                updateVisualProgress();
+            }
+        }
+        
+        // Track that lesson was worked on in this session
+        function trackSessionProgress(lessonId) {
+            lessonProgress.sessionProgress.add(lessonId);
+        }
+        
+        // Update visual indicators for completed lessons
+        function updateVisualProgress() {
+            // Add checkmarks to completed lessons
+            lessonProgress.completedLessons.forEach(lessonId => {
+                const button = document.querySelector(`[onclick*="${lessonId}"]`);
+                if (button && !button.textContent.includes('✅')) {
+                    button.textContent = '✅ ' + button.textContent;
+                    button.style.background = '#4caf50';
+                }
+            });
+            
+            // Update tabs with completion indicators
+            const tabProgress = {
+                'day1-morning': ['code1', 'code2', 'code3', 'quiz1'],
+                'day1-afternoon': ['code4', 'code5', 'code6', 'quiz2'],
+                'day2-morning': ['code7', 'code8', 'code9'],
+                'day2-afternoon': ['code10', 'code11', 'code12', 'quiz3']
+            };
+            
+            Object.entries(tabProgress).forEach(([tabName, lessons]) => {
+                const completed = lessons.filter(l => 
+                    lessonProgress.completedLessons.has(l) || 
+                    lessonProgress.completedQuizzes.has(l)
+                ).length;
+                const total = lessons.length;
+                
+                const tab = document.querySelector(`[onclick="showTab('${tabName}')"]`);
+                if (tab) {
+                    const progressText = ` (${completed}/${total})`;
+                    if (!tab.textContent.includes('(')) {
+                        tab.textContent += progressText;
+                    }
+                    if (completed === total) {
+                        tab.style.background = '#4caf50';
+                        tab.style.color = 'white';
+                    }
+                }
+            });
+        }
+        
         function initializeEditor(textarea) {
             if (!textarea.CodeMirror) {
                 const editor = CodeMirror.fromTextArea(textarea, {
@@ -517,6 +610,10 @@
                 function(mod) {
                     console.log("Code executed successfully");
                     showSuccessAnimation();
+                    
+                    // Track lesson progress
+                    trackSessionProgress(codeId);
+                    markLessonCompleted(codeId);
                 },
                 function(err) {
                     outputDiv.innerHTML = "❌ Oops! There's an error:\n" + err.toString() + "\n";
@@ -537,6 +634,11 @@
                 feedback.innerHTML = '✅ Correct! Great job!';
                 feedback.style.color = '#4caf50';
                 showSuccessAnimation();
+                
+                // Track quiz completion
+                lessonProgress.completedQuizzes.add(quizId);
+                saveProgress();
+                updateVisualProgress();
             } else {
                 feedback.innerHTML = '❌ Not quite. Try again!';
                 feedback.style.color = '#f44336';
@@ -580,6 +682,10 @@
             
             // Update progress
             updateProgress(tabName);
+            
+            // Save last active tab
+            lessonProgress.lastActiveTab = tabName;
+            saveProgress();
         }
 
         function updateProgress(tabName) {
@@ -603,12 +709,29 @@
 
         // Initialize only visible editors on page load
         window.onload = function() {
-            // Ensure only welcome tab is active
+            // Load saved progress
+            loadProgress();
+            
+            // Show last active tab or welcome tab
+            const startTab = lessonProgress.lastActiveTab || 'welcome';
+            
+            // Ensure only correct tab is active
             const contents = document.getElementsByClassName('content');
             for (let content of contents) {
                 content.classList.remove('active');
             }
-            document.getElementById('welcome').classList.add('active');
+            
+            const tabs = document.getElementsByClassName('tab');
+            for (let tab of tabs) {
+                tab.classList.remove('active');
+            }
+            
+            // Activate the correct tab
+            document.getElementById(startTab).classList.add('active');
+            const activeTab = document.querySelector(`[onclick="showTab('${startTab}')"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
             
             // Initialize editors in active content
             const activeContent = document.querySelector('.content.active');
@@ -618,6 +741,10 @@
                     initializeEditor(textarea);
                 });
             }
+            
+            // Update visual progress indicators
+            updateVisualProgress();
+            updateProgress(startTab);
         };
     </script>
 </head>
