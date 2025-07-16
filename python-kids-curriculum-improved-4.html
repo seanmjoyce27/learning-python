@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Adventure - Learn to Code!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Tezumie/Skulpt-CDN@latest/skulpt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Tezumie/Skulpt-CDN@latest/skulpt-stdlib.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            color: #764ba2;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 15px 30px;
+            margin: 5px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.2);
+        }
+        
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none !important;
+        }
+        
+        .content.active {
+            display: block !important;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .lesson {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .lesson h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        
+        .lesson h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .code-editor {
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .CodeMirror {
+            height: 200px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+        }
+        
+        .run-button {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(72,187,120,0.3);
+        }
+        
+        .run-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(72,187,120,0.4);
+        }
+        
+        .run-button:active {
+            transform: translateY(0);
+        }
+        
+        .output {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .challenge {
+            background: #fef5e7;
+            border: 2px dashed #f39c12;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .challenge h4 {
+            color: #f39c12;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        
+        .tip {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .tip strong {
+            color: #4caf50;
+        }
+        
+        .error-tip {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .error-tip strong {
+            color: #f44336;
+        }
+        
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #ffd700;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin: 10px;
+            box-shadow: 0 3px 10px rgba(255,215,0,0.4);
+            animation: bounce 1s ease-in-out;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .interactive-demo {
+            background: #f0f7ff;
+            border: 2px solid #2196f3;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .interactive-demo h4 {
+            color: #2196f3;
+            margin-bottom: 15px;
+        }
+        
+        .guided-practice {
+            background: #f3e5f5;
+            border: 2px solid #9c27b0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .guided-practice h4 {
+            color: #9c27b0;
+            margin-bottom: 15px;
+        }
+        
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        
+        .visual-output {
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            text-align: center;
+            min-height: 150px;
+        }
+        
+        .playground {
+            background: #fffde7;
+            border: 3px solid #ffd600;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .playground h3 {
+            color: #f57f17;
+            margin-bottom: 15px;
+        }
+        
+        .mini-quiz {
+            background: #e1f5fe;
+            border: 2px solid #01579b;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .mini-quiz h4 {
+            color: #01579b;
+            margin-bottom: 15px;
+        }
+        
+        .quiz-option {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            background: #b3e5fc;
+        }
+        
+        .theme-selector {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .theme-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .theme-btn:hover {
+            border-color: #333;
+        }
+        
+        .theme-purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .theme-blue { background: linear-gradient(135deg, #2196f3, #1976d2); }
+        .theme-green { background: linear-gradient(135deg, #4caf50, #388e3c); }
+        .theme-orange { background: linear-gradient(135deg, #ff9800, #f57c00); }
+        
+        .success-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 100px;
+            animation: successPop 1s ease-out;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        @keyframes successPop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+        
+        .pair-activity {
+            background: #fff3e0;
+            border: 2px solid #ff6f00;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .pair-activity h4 {
+            color: #ff6f00;
+            margin-bottom: 15px;
+        }
+        
+        .sticker-reward {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            margin: 10px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        .sticker-star { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFD700"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'); }
+        .sticker-rocket { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FF6347"><path d="M12 2C8 2 5 5 5 9c0 2.5 1.5 4.5 3.5 5.5L7 22l5-3 5 3-1.5-7.5c2-1 3.5-3 3.5-5.5 0-4-3-7-7-7z"/></svg>'); }
+        .sticker-trophy { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFD700"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.6 1.9 4.7 4.4 5.1.6 1.3 1.8 2.3 3.1 2.7V19H8v2h8v-2h-2.5v-3.2c1.3-.4 2.5-1.4 3.1-2.7C19.1 12.7 21 10.6 21 8V7c0-1.1-.9-2-2-2z"/></svg>'); }
+    </style>
+    <script>
+        // Audio feedback
+        const successSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBj');
+        
+        // Theme system
+        let currentTheme = 'purple';
+        
+        function setTheme(theme) {
+            currentTheme = theme;
+            const gradients = {
+                purple: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                blue: 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)',
+                green: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
+                orange: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)'
+            };
+            document.body.style.background = gradients[theme];
+        }
+        
+        // Hide all content divs immediately
+        document.addEventListener('DOMContentLoaded', function() {
+            const contents = document.getElementsByClassName('content');
+            for (let content of contents) {
+                content.style.display = 'none';
+                content.classList.remove('active');
+            }
+            // Show only welcome
+            const welcome = document.getElementById('welcome');
+            if (welcome) {
+                welcome.style.display = 'block';
+                welcome.classList.add('active');
+            }
+        });
+        
+        // Skulpt configuration
+        function builtinRead(x) {
+            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
+                throw "File not found: '" + x + "'";
+            }
+            return Sk.builtinFiles["files"][x];
+        }
+        
+        // Store CodeMirror instances
+        const editors = {};
+        
+        function initializeEditor(textarea) {
+            if (!textarea.CodeMirror) {
+                const editor = CodeMirror.fromTextArea(textarea, {
+                    mode: 'python',
+                    theme: 'default',
+                    lineNumbers: true,
+                    indentUnit: 4,
+                    lineWrapping: true
+                });
+                editors[textarea.id] = editor;
+            }
+        }
+        
+        function showSuccessAnimation() {
+            const emoji = document.createElement('div');
+            emoji.className = 'success-animation';
+            emoji.textContent = '🎉';
+            document.body.appendChild(emoji);
+            successSound.play().catch(() => {}); // Play sound, ignore if blocked
+            setTimeout(() => emoji.remove(), 1000);
+        }
+        
+        function runCode(codeId, outputId, visualId = null) {
+            const textarea = document.getElementById(codeId);
+            const editor = editors[codeId];
+            const code = editor ? editor.getValue() : textarea.value;
+            const outputDiv = document.getElementById(outputId);
+            
+            outputDiv.innerHTML = "Running...\n";
+            
+            // Add visual output support
+            if (visualId) {
+                const visualDiv = document.getElementById(visualId);
+                if (visualDiv) visualDiv.innerHTML = "";
+            }
+            
+            Sk.pre = outputId;
+            Sk.configure({
+                output: function(text) {
+                    outputDiv.innerHTML += text;
+                    // Check for visual patterns
+                    if (visualId && document.getElementById(visualId)) {
+                        const visualDiv = document.getElementById(visualId);
+                        if (text.includes('🎨')) {
+                            visualDiv.innerHTML = text;
+                        }
+                    }
+                },
+                read: builtinRead,
+                inputfun: function(prompt) {
+                    return window.prompt(prompt);
+                },
+                inputfunTakesPrompt: true
+            });
+            
+            Sk.misceval.asyncToPromise(function() {
+                return Sk.importMainWithBody("<stdin>", false, code, true);
+            }).then(
+                function(mod) {
+                    console.log("Code executed successfully");
+                    showSuccessAnimation();
+                },
+                function(err) {
+                    outputDiv.innerHTML = "❌ Oops! There's an error:\n" + err.toString() + "\n";
+                    outputDiv.innerHTML += "\n💡 Check your code and try again!";
+                }
+            );
+        }
+
+        function checkQuiz(quizId, answer) {
+            const feedback = document.getElementById(quizId + '-feedback');
+            const correct = {
+                'quiz1': 'print',
+                'quiz2': 'box',
+                'quiz3': 'yes'
+            };
+            
+            if (answer === correct[quizId]) {
+                feedback.innerHTML = '✅ Correct! Great job!';
+                feedback.style.color = '#4caf50';
+                showSuccessAnimation();
+            } else {
+                feedback.innerHTML = '❌ Not quite. Try again!';
+                feedback.style.color = '#f44336';
+            }
+        }
+
+        function showTab(tabName) {
+            // Hide all contents
+            const contents = document.getElementsByClassName('content');
+            for (let content of contents) {
+                content.classList.remove('active');
+            }
+            
+            // Remove active from all tabs
+            const tabs = document.getElementsByClassName('tab');
+            for (let tab of tabs) {
+                tab.classList.remove('active');
+            }
+            
+            // Show selected content
+            const selectedContent = document.getElementById(tabName);
+            selectedContent.classList.add('active');
+            
+            // Mark clicked tab as active
+            event.target.classList.add('active');
+            
+            // Initialize CodeMirror for visible textareas
+            const visibleTextareas = selectedContent.querySelectorAll('.code-editor textarea');
+            visibleTextareas.forEach(textarea => {
+                initializeEditor(textarea);
+            });
+            
+            // Refresh CodeMirror instances to fix display issues
+            setTimeout(() => {
+                visibleTextareas.forEach(textarea => {
+                    if (editors[textarea.id]) {
+                        editors[textarea.id].refresh();
+                    }
+                });
+            }, 100);
+            
+            // Update progress
+            updateProgress(tabName);
+        }
+
+        function updateProgress(tabName) {
+            const progress = {
+                'welcome': 0,
+                'day1-morning': 25,
+                'day1-afternoon': 50,
+                'day2-morning': 75,
+                'day2-afternoon': 90,
+                'playground': 95,
+                'certificates': 100
+            };
+            
+            const percent = progress[tabName] || 0;
+            const progressBar = document.querySelector('.progress');
+            if (progressBar) {
+                progressBar.style.width = percent + '%';
+                progressBar.textContent = percent + '%';
+            }
+        }
+
+        // Initialize only visible editors on page load
+        window.onload = function() {
+            // Ensure only welcome tab is active
+            const contents = document.getElementsByClassName('content');
+            for (let content of contents) {
+                content.classList.remove('active');
+            }
+            document.getElementById('welcome').classList.add('active');
+            
+            // Initialize editors in active content
+            const activeContent = document.querySelector('.content.active');
+            if (activeContent) {
+                const textareas = activeContent.querySelectorAll('.code-editor textarea');
+                textareas.forEach(textarea => {
+                    initializeEditor(textarea);
+                });
+            }
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐍 Python Adventure 🚀</h1>
+            <p class="subtitle">Learn to Code in 3 Fun Days!</p>
+            <div class="progress-bar">
+                <div class="progress">0%</div>
+            </div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="tab active" onclick="showTab('welcome')">Welcome</button>
+            <button class="tab" onclick="showTab('day1-morning')">Day 1: Morning</button>
+            <button class="tab" onclick="showTab('day1-afternoon')">Day 1: Afternoon</button>
+            <button class="tab" onclick="showTab('day2-morning')">Day 2: Morning</button>
+            <button class="tab" onclick="showTab('day2-afternoon')">Day 2: Afternoon</button>
+            <button class="tab" onclick="showTab('playground')">🎮 Playground</button>
+            <button class="tab" onclick="showTab('certificates')">🏆 Certificates</button>
+        </div>
+        
+        <div id="welcome" class="content active" style="display: block;">
+            <h2>🎉 Welcome Young Coders!</h2>
+            <p style="font-size: 1.3em; line-height: 1.8; margin: 20px 0;">
+                Get ready for an amazing adventure into the world of Python programming! 
+                Over the next 3 days, you'll learn how to create your own programs, games, and solve puzzles using code!
+            </p>
+            
+            <div class="lesson">
+                <h3>🎯 What You'll Learn:</h3>
+                <ul style="font-size: 1.2em; line-height: 1.8; margin-left: 30px;">
+                    <li>How to make the computer say hello! 👋</li>
+                    <li>Creating colorful patterns and art 🎨</li>
+                    <li>Building fun games 🎮</li>
+                    <li>Making programs that can make decisions 🤖</li>
+                    <li>Working with friends to solve coding puzzles 👥</li>
+                </ul>
+            </div>
+            
+            <div class="tip">
+                <strong>Pro Tip:</strong> Don't worry if you make mistakes - that's how we learn! 
+                Every programmer makes mistakes, even the experts! 🌟
+            </div>
+            
+            <div class="interactive-demo">
+                <h4>🎮 Before We Start: Label Maker Activity!</h4>
+                <p>Imagine you have three boxes in your room. Let's label them!</p>
+                <p>Box 1: <input type="text" id="box1" placeholder="toys"> </p>
+                <p>Box 2: <input type="text" id="box2" placeholder="books"> </p>
+                <p>Box 3: <input type="text" id="box3" placeholder="games"> </p>
+                <p>In Python, we call these boxes "variables" - they store our stuff!</p>
+            </div>
+        </div>
+        
+        <div id="day1-morning" class="content" style="display: none;">
+            <h2>Day 1: Morning Session</h2>
+            
+            <div class="lesson">
+                <h2>Lesson 1: Hello Python! 👋</h2>
+                <p>Let's start by making Python say hello to us!</p>
+                
+                <div class="tip">
+                    <strong>🧠 How it works:</strong> When we type <code>print()</code>, we're telling Python to show us something on the screen. 
+                    Whatever we put inside the quotes " " is exactly what Python will show us!
+                </div>
+                
+                <div class="code-editor">
+                    <textarea id="code1">print("Hello, World!")
+print("My name is Python!")
+print("I love coding!")</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code1', 'output1')">▶ Run Code</button>
+                <div id="output1" class="output">Click "Run Code" to see the magic happen!</div>
+                
+                <div class="guided-practice">
+                    <h4>👟 Let's Practice Together!</h4>
+                    <p>Change "World" to your name in the first line, then run the code again!</p>
+                    <p>Next, add a fourth line that says your favorite color!</p>
+                </div>
+                
+                <div class="error-tip">
+                    <strong>Common Mistake:</strong> Forgot the quotes? Python needs quotes around words!<br>
+                    ❌ Wrong: <code>print(Hello)</code><br>
+                    ✅ Right: <code>print("Hello")</code>
+                </div>
+                
+                <div class="mini-quiz">
+                    <h4>Quick Check! 🧠</h4>
+                    <p>What command do we use to show text on the screen?</p>
+                    <div class="quiz-option" onclick="checkQuiz('quiz1', 'print')">print()</div>
+                    <div class="quiz-option" onclick="checkQuiz('quiz1', 'show')">show()</div>
+                    <div class="quiz-option" onclick="checkQuiz('quiz1', 'display')">display()</div>
+                    <div id="quiz1-feedback" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+            
+            <div class="lesson">
+                <h2>Lesson 2: Python Art - Drawing with Text! 🎨</h2>
+                <p>Let's create colorful patterns using text!</p>
+                
+                <div class="code-editor">
+                    <textarea id="code2"># Let's draw a tree!
+print("    🌟    ")
+print("   🎄🎄   ")
+print("  🎄🎄🎄  ")
+print(" 🎄🎄🎄🎄 ")
+print("🎄🎄🎄🎄🎄")
+print("    🎁    ")
+
+print("\nNow a rocket!")
+print("     🚀     ")
+print("    🔥🔥    ")
+print("   🔥🔥🔥   ")
+print("  🔥🔥🔥🔥  ")</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code2', 'output2', 'visual2')">▶ Run Code</button>
+                <div id="output2" class="output">Click "Run Code" to see your art!</div>
+                <div id="visual2" class="visual-output"></div>
+                
+                <div class="pair-activity">
+                    <h4>👥 Partner Activity!</h4>
+                    <p>Work with a friend to create your own ASCII art! One person designs, the other types!</p>
+                    <p>Ideas: House 🏠, Cat 🐱, Flower 🌻, or your own creation!</p>
+                </div>
+            </div>
+            
+            <div class="lesson">
+                <h2>Lesson 3: Variables - Python's Label Maker! 🏷️</h2>
+                <p>Remember our boxes? Let's label some in Python!</p>
+                
+                <div class="tip">
+                    <strong>🧠 How it works:</strong> Variables are like labeled boxes. We put a label on the box (like <code>my_name</code>) 
+                    and store something inside (like <code>"Alex"</code>). The = sign means "put this in the box"!
+                </div>
+                
+                <div class="code-editor">
+                    <textarea id="code3"># Let's make some labeled boxes!
+my_name = "Alex"
+my_age = 10
+favorite_animal = "🐶"
+
+print("Hi! My name is " + my_name)
+print("I am " + str(my_age) + " years old")
+print("I love " + favorite_animal)
+
+# Let's change what's in the box!
+favorite_animal = "🐱"
+print("Actually, now I love " + favorite_animal)</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code3', 'output3')">▶ Run Code</button>
+                <div id="output3" class="output">Click "Run Code" to meet our friend!</div>
+                
+                <div class="guided-practice">
+                    <h4>👟 Your Turn - Step by Step!</h4>
+                    <p>1. Change "Alex" to your name</p>
+                    <p>2. Change 10 to your age</p>
+                    <p>3. Pick your own favorite animal emoji!</p>
+                    <p>4. Run the code to see your story!</p>
+                </div>
+                
+                <div class="error-tip">
+                    <strong>Common Mistake:</strong> Mixing text and numbers?<br>
+                    ❌ Wrong: <code>print("I am " + 10)</code><br>
+                    ✅ Right: <code>print("I am " + str(10))</code><br>
+                    We use str() to turn numbers into text!
+                </div>
+                
+                <div class="mini-quiz">
+                    <h4>Quick Check! 🧠</h4>
+                    <p>Variables are like...</p>
+                    <div class="quiz-option" onclick="checkQuiz('quiz2', 'computer')">computers</div>
+                    <div class="quiz-option" onclick="checkQuiz('quiz2', 'box')">labeled boxes</div>
+                    <div class="quiz-option" onclick="checkQuiz('quiz2', 'printer')">printers</div>
+                    <div id="quiz2-feedback" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="day1-afternoon" class="content" style="display: none;">
+            <h2>Day 1: Afternoon Session</h2>
+            
+            <div class="lesson">
+                <h2>Lesson 4: Python Calculator 🔢</h2>
+                <p>Python is great at math! Let's make it do some calculations for us.</p>
+                
+                <div class="tip">
+                    <strong>🧠 How it works:</strong> Python knows math! When it sees numbers with + - * or /, it calculates the answer automatically!
+                </div>
+                
+                <div class="code-editor">
+                    <textarea id="code4"># Python Calculator!
+# Addition
+apples = 5
+bananas = 3
+total_fruit = apples + bananas
+print("I have " + str(apples) + " apples and " + str(bananas) + " bananas")
+print("That's " + str(total_fruit) + " fruits total! 🍎🍌")
+
+# Making patterns with math
+stars = "⭐"
+print("\nStar patterns:")
+print(stars * 1)
+print(stars * 2)
+print(stars * 3)
+print(stars * 4)
+print(stars * 5)</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code4', 'output4')">▶ Run Code</button>
+                <div id="output4" class="output">Click "Run Code" to calculate!</div>
+                
+                <div class="guided-practice">
+                    <h4>👟 Let's Practice!</h4>
+                    <p>1. Change the number of apples to 8</p>
+                    <p>2. Change the number of bananas to 4</p>
+                    <p>3. Try changing the star ⭐ to a heart ❤️</p>
+                </div>
+                
+                <div class="tip">
+                    <strong>Math Symbols in Python:</strong><br>
+                    + means add (5 + 3 = 8)<br>
+                    - means subtract (10 - 4 = 6)<br>
+                    * means multiply (3 * 4 = 12)<br>
+                    / means divide (20 / 4 = 5)
+                </div>
+            </div>
+            
+            <div class="lesson">
+                <h2>Lesson 5: Making Decisions with If/Else 🤔</h2>
+                <p>Let's teach Python how to make choices!</p>
+                
+                <div class="tip">
+                    <strong>🧠 How it works:</strong> <code>if</code> is like asking a question. If the answer is yes, Python does one thing. If no, it does something else!
+                </div>
+                
+                <div class="interactive-demo">
+                    <h4>💡 The Magic of Indentation!</h4>
+                    <p>See how some lines start with spaces? That's called "indentation". 
+                    It's like putting things inside a folder!</p>
+                </div>
+                
+                <div class="code-editor">
+                    <textarea id="code5"># Weather Checker!
+temperature = 75
+
+print("🌡️ The temperature is " + str(temperature) + " degrees")
+
+if temperature > 80:
+    print("It's hot! 🌞")
+    print("Let's get ice cream! 🍦")
+else:
+    print("Nice weather! 🌤️")
+    print("Let's play outside! ⚽")
+
+# Pet Size Checker
+pet_weight = 15
+
+print("\n🐕 My pet weighs " + str(pet_weight) + " pounds")
+
+if pet_weight < 10:
+    print("Small pet! So cute! 🐹")
+elif pet_weight < 30:
+    print("Medium pet! Perfect size! 🐕")
+else:
+    print("Big pet! Gentle giant! 🐘")</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code5', 'output5')">▶ Run Code</button>
+                <div id="output5" class="output">Click "Run Code" to see decisions!</div>
+                
+                <div class="guided-practice">
+                    <h4>👟 Try These Changes!</h4>
+                    <p>1. Change temperature to 85 - what happens?</p>
+                    <p>2. Change pet_weight to 5 - what message do you get?</p>
+                    <p>3. Add your own elif for temperature between 60 and 80!</p>
+                </div>
+                
+                <div class="error-tip">
+                    <strong>Common Mistake:</strong> Forgot the colon?<br>
+                    ❌ Wrong: <code>if temperature > 80</code><br>
+                    ✅ Right: <code>if temperature > 80:</code><br>
+                    The colon : tells Python "here comes what to do!"
+                </div>
+                
+                <div class="mini-quiz">
+                    <h4>Quick Check! 🧠</h4>
+                    <p>Does Python need spaces at the start of lines inside if statements?</p>
+                    <div class="quiz-option" onclick="checkQuiz('quiz3', 'yes')">Yes, for indentation</div>
+                    <div class="quiz-option" onclick="checkQuiz('quiz3', 'no')">No, never</div>
+                    <div class="quiz-option" onclick="checkQuiz('quiz3', 'sometimes')">Sometimes</div>
+                    <div id="quiz3-feedback" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+            
+            <div class="lesson">
+                <h2>Lesson 6: Loops - Repeat the Fun! 🔄</h2>
+                <p>Why write something 10 times when Python can do it for us?</p>
+                
+                <div class="tip">
+                    <strong>🧠 How it works:</strong> Loops are like a merry-go-round! Python goes around and around, doing the same thing each time.
+                </div>
+                
+                <div class="code-editor">
+                    <textarea id="code6"># Counting is fun!
+print("Let's count to 5:")
+for number in range(1, 6):
+    print(str(number) + " 🎯")
+
+# Making a pyramid!
+print("\nBuilding a pyramid:")
+for i in range(1, 6):
+    spaces = " " * (5 - i)
+    blocks = "🧱" * i
+    print(spaces + blocks)
+
+# Countdown for rocket launch!
+print("\nRocket launch countdown:")
+for count in range(5, 0, -1):
+    print(str(count) + "...")
+print("🚀 BLAST OFF!")</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code6', 'output6', 'visual6')">▶ Run Code</button>
+                <div id="output6" class="output">Click "Run Code" to see loops!</div>
+                <div id="visual6" class="visual-output"></div>
+                
+                <div class="guided-practice">
+                    <h4>👟 Modify the Code!</h4>
+                    <p>1. Make the pyramid 7 levels tall instead of 5</p>
+                    <p>2. Change the countdown to start from 10</p>
+                    <p>3. Replace 🧱 with ⭐ to make a star pyramid!</p>
+                </div>
+                
+                <div class="pair-activity">
+                    <h4>👥 Team Challenge!</h4>
+                    <p>With a partner, create a pattern using loops!</p>
+                    <p>One person says the pattern, the other codes it!</p>
+                    <p>Example: "Make 3 rows of 5 hearts each"</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="day2-morning" class="content" style="display: none;">
+            <h2>Day 2: Morning Session</h2>
+            
+            <div class="lesson">
+                <h2>Lesson 7: Fun with Lists 📝</h2>
+                <p>Lists help us keep track of many things at once!</p>
+                
+                <div class="tip">
+                    <strong>🧠 How it works:</strong> A list is like a backpack with pockets! We use [ ] to make a list and commas to separate items.
+                </div>
+                
+                <div class="code-editor">
+                    <textarea id="code7"># My favorite things!
+favorite_colors = ["red", "blue", "green", "purple"]
+favorite_foods = ["🍕", "🍔", "🌮", "🍰"]
+
+print("My favorite colors:")
+for color in favorite_colors:
+    print("  🎨 " + color)
+
+print("\nMy favorite foods:")
+for food in favorite_foods:
+    print("  " + food)
+
+# Let's add more!
+favorite_foods.append("🍦")
+print("\nI just remembered I love ice cream too!")
+print("Now I have " + str(len(favorite_foods)) + " favorite foods!")
+
+# Mix and match!
+print("\nFood and color combos:")
+print(favorite_colors[0] + " " + favorite_foods[0])  # red pizza
+print(favorite_colors[1] + " " + favorite_foods[4])  # blue ice cream</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code7', 'output7')">▶ Run Code</button>
+                <div id="output7" class="output">Click "Run Code" to see lists!</div>
+                
+                <div class="guided-practice">
+                    <h4>👟 Your Turn!</h4>
+                    <p>1. Add "yellow" to the colors list</p>
+                    <p>2. Add your favorite food emoji to the foods list</p>
+                    <p>3. Create your own list of favorite animals!</p>
+                </div>
+                
+                <div class="interactive-demo">
+                    <h4>💡 List Powers!</h4>
+                    <p><code>.append()</code> = add to the end</p>
+                    <p><code>len()</code> = count items</p>
+                    <p><code>[0]</code> = get first item (counting starts at 0!)</p>
+                    <p><code>[1]</code> = get second item</p>
+                </div>
+            </div>
+            
+            <div class="lesson">
+                <h2>Lesson 8: Simple Functions 🛠️</h2>
+                <p>Functions are like magic spells - we create them once and use them many times!</p>
+                
+                <div class="tip">
+                    <strong>🧠 How it works:</strong> <code>def</code> means "define" - we're teaching Python a new trick!
+                </div>
+                
+                <div class="code-editor">
+                    <textarea id="code8"># Let's make a greeting spell!
+def say_hello(name):
+    print("✨ Hello, " + name + "! ✨")
+    print("Nice to meet you!")
+
+# Use our spell
+say_hello("Emma")
+say_hello("Lucas")
+say_hello("Sophia")
+
+# A drawing function!
+def draw_house():
+    print("   🏠   ")
+    print("  /  \  ")
+    print(" /    \ ")
+    print("|  🚪  |")
+    print("|______|")
+
+print("\nMy neighborhood:")
+draw_house()
+draw_house()
+draw_house()</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code8', 'output8')">▶ Run Code</button>
+                <div id="output8" class="output">Click "Run Code" to see functions!</div>
+                
+                <div class="guided-practice">
+                    <h4>👟 Create Your Own Function!</h4>
+                    <p>1. Make a function called draw_tree that draws a tree</p>
+                    <p>2. Make a function called cheer that prints "Go team!"</p>
+                    <p>3. Call your functions multiple times!</p>
+                </div>
+                
+                <div class="error-tip">
+                    <strong>Common Mistake:</strong> Forgot to call the function?<br>
+                    ❌ Wrong: Just defining <code>def say_hello(name):</code><br>
+                    ✅ Right: Define it AND call it: <code>say_hello("Alex")</code>
+                </div>
+            </div>
+            
+            <div class="lesson">
+                <h2>Lesson 9: Number Guessing Game! 🎲</h2>
+                <p>Let's create our first real game!</p>
+                
+                <div class="code-editor">
+                    <textarea id="code9">import random
+
+print("🎮 Welcome to the Number Guessing Game!")
+print("I'm thinking of a number between 1 and 10...")
+
+secret = random.randint(1, 10)
+tries = 3
+
+while tries > 0:
+    print("\nYou have " + str(tries) + " guesses left!")
+    guess = int(input("What's your guess? "))
+    
+    if guess == secret:
+        print("🎉 YOU WIN! 🎉")
+        print("Great job! You guessed it!")
+        break
+    elif guess < secret:
+        print("📈 Try higher!")
+    else:
+        print("📉 Try lower!")
+    
+    tries = tries - 1
+
+if tries == 0:
+    print("\n😅 Out of guesses! The number was " + str(secret))
+    
+print("\nThanks for playing!")</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code9', 'output9')">▶ Run Code</button>
+                <div id="output9" class="output">Click "Run Code" to play!</div>
+                
+                <div class="tip">
+                    <strong>🎮 Game Tip:</strong> This is our first time using <code>import</code>! It gives us extra powers - like the ability to pick random numbers!
+                </div>
+            </div>
+        </div>
+        
+        <div id="day2-afternoon" class="content" style="display: none;">
+            <h2>Day 2: Afternoon Session</h2>
+            
+            <div class="lesson">
+                <h2>Lesson 10: Rock, Paper, Scissors! ✂️</h2>
+                <p>Let's create the classic game!</p>
+                
+                <div class="code-editor">
+                    <textarea id="code10">import random
+
+print("🎮 Rock, Paper, Scissors!")
+print("Best of 3 rounds wins!\n")
+
+player_score = 0
+computer_score = 0
+
+for round in range(1, 4):
+    print("Round " + str(round) + "!")
+    
+    # Get choices
+    player = input("Choose rock, paper, or scissors: ").lower()
+    choices = ["rock", "paper", "scissors"]
+    computer = random.choice(choices)
+    
+    # Show choices with emojis!
+    emojis = {"rock": "🪨", "paper": "📄", "scissors": "✂️"}
+    print("You: " + emojis.get(player, "❓"))
+    print("Computer: " + emojis[computer])
+    
+    # Check who wins
+    if player == computer:
+        print("It's a tie! 🤝")
+    elif (player == "rock" and computer == "scissors") or \
+         (player == "paper" and computer == "rock") or \
+         (player == "scissors" and computer == "paper"):
+        print("You win this round! 🎉")
+        player_score = player_score + 1
+    else:
+        print("Computer wins this round! 🤖")
+        computer_score = computer_score + 1
+    
+    print("Score: You " + str(player_score) + " - " + str(computer_score) + " Computer\n")
+
+# Final results!
+if player_score > computer_score:
+    print("🏆 YOU ARE THE CHAMPION! 🏆")
+elif computer_score > player_score:
+    print("🤖 Computer wins! Try again!")
+else:
+    print("🤝 It's a tie game!")</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code10', 'output10')">▶ Run Code</button>
+                <div id="output10" class="output">Click "Run Code" to play!</div>
+                
+                <div class="pair-activity">
+                    <h4>👥 Tournament Time!</h4>
+                    <p>Play against a classmate! One person runs the code, both play!</p>
+                    <p>Keep track of who wins the most games!</p>
+                </div>
+            </div>
+            
+            <div class="lesson">
+                <h2>Lesson 11: Adventure Story! 📚</h2>
+                <p>Create your own interactive story!</p>
+                
+                <div class="code-editor">
+                    <textarea id="code11">print("🏰 Welcome to Adventure Island! 🏰\n")
+
+name = input("What's your name, brave explorer? ")
+print("\nWelcome, " + name + "! Your adventure begins...\n")
+
+# Adventure starts!
+print("You find a mysterious map with two paths:")
+print("1. 🌋 Volcano Path")
+print("2. 🏖️ Beach Path")
+
+choice = input("\nWhich path do you choose? (1 or 2): ")
+
+if choice == "1":
+    print("\n🌋 You climb the volcano...")
+    print("You find a dragon egg! 🥚")
+    action = input("Do you 'take' it or 'leave' it? ")
+    
+    if action == "take":
+        print("\n✨ The egg hatches into a friendly baby dragon!")
+        print("🐉 You've made a new friend! YOU WIN!")
+    else:
+        print("\n👍 Good choice! The mama dragon thanks you!")
+        print("🎁 She gives you a treasure chest! YOU WIN!")
+        
+else:
+    print("\n🏖️ You walk along the beach...")
+    print("You see a bottle with a message! 📜")
+    action = input("Do you 'open' it or 'ignore' it? ")
+    
+    if action == "open":
+        print("\n📍 It's a treasure map!")
+        print("💰 You find the pirate gold! YOU WIN!")
+    else:
+        print("\n🐚 You find beautiful shells instead!")
+        print("🎨 You make amazing shell art! YOU WIN!")
+
+print("\nWhat an adventure, " + name + "! 🌟")</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code11', 'output11')">▶ Run Code</button>
+                <div id="output11" class="output">Click "Run Code" to start your adventure!</div>
+                
+                <div class="challenge">
+                    <h4>🌟 Challenge: Expand the Story!</h4>
+                    <p>Add a third path option! Maybe a 🌲 Forest Path?</p>
+                    <p>Make the adventure longer with more choices!</p>
+                </div>
+            </div>
+            
+            <div class="lesson">
+                <h2>Lesson 12: Pet Care Game! 🐾</h2>
+                <p>Let's create a simple virtual pet!</p>
+                
+                <div class="code-editor">
+                    <textarea id="code12">print("🐾 Virtual Pet Game! 🐾\n")
+
+# Create your pet
+pet_name = input("What would you like to name your pet? ")
+pet_type = input("Is it a cat 🐱, dog 🐶, or bunny 🐰? ")
+
+# Pet stats
+happiness = 50
+hunger = 50
+energy = 50
+
+print("\n" + pet_name + " the " + pet_type + " is here!")
+print("Take good care of your pet!\n")
+
+# Game loop - 5 turns
+for turn in range(1, 6):
+    print("--- Day " + str(turn) + " ---")
+    print("😊 Happiness: " + "❤️" * (happiness // 10))
+    print("🍽️ Hunger: " + "🍖" * (hunger // 10))
+    print("⚡ Energy: " + "⭐" * (energy // 10))
+    
+    print("\nWhat would you like to do?")
+    print("1. Feed " + pet_name)
+    print("2. Play with " + pet_name)
+    print("3. Let " + pet_name + " rest")
+    
+    choice = input("Choose 1, 2, or 3: ")
+    
+    if choice == "1":
+        print("🍖 " + pet_name + " is eating... Yum!")
+        hunger = hunger - 20
+        happiness = happiness + 10
+    elif choice == "2":
+        if energy > 20:
+            print("🎾 " + pet_name + " is playing! So fun!")
+            happiness = happiness + 20
+            energy = energy - 20
+            hunger = hunger + 10
+        else:
+            print("😴 " + pet_name + " is too tired to play!")
+    else:
+        print("💤 " + pet_name + " is resting... Zzz...")
+        energy = energy + 30
+    
+    # Keep stats in range
+    if happiness > 100: happiness = 100
+    if hunger < 0: hunger = 0
+    if energy > 100: energy = 100
+    
+    print()
+
+# Game over!
+print("\n🎮 Game Over!")
+print("Final stats for " + pet_name + ":")
+print("😊 Happiness: " + str(happiness))
+print("🍽️ Hunger: " + str(hunger))
+print("⚡ Energy: " + str(energy))
+
+if happiness > 70:
+    print("\n🌟 " + pet_name + " is very happy! Great job!")</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('code12', 'output12')">▶ Run Code</button>
+                <div id="output12" class="output">Click "Run Code" to play!</div>
+                
+                <div class="tip">
+                    <strong>🎮 Game Design:</strong> Notice how we use simple variables instead of complex classes? This makes the game easier to understand and modify!
+                </div>
+            </div>
+        </div>
+        
+        <div id="playground" class="content" style="display: none;">
+            <h2>🎮 Python Playground</h2>
+            
+            <div class="playground">
+                <h3>Free Coding Zone!</h3>
+                <p>This is your space to experiment! Try combining everything you've learned!</p>
+                
+                <div class="code-editor">
+                    <textarea id="playground-code"># Your playground! Try anything you want!
+# Here are some ideas to get you started:
+
+# 1. Make a pattern
+print("My Pattern:")
+for i in range(5):
+    print("🌟 " * i)
+
+# 2. Create a mini calculator
+num1 = 10
+num2 = 5
+print("\nMini Calculator:")
+print(str(num1) + " + " + str(num2) + " = " + str(num1 + num2))
+
+# 3. Make a list of friends
+friends = ["Alice", "Bob", "Charlie"]
+print("\nMy friends:")
+for friend in friends:
+    print("👋 Hi " + friend + "!")
+
+# Now add your own code below!
+</textarea>
+                </div>
+                <button class="run-button" onclick="runCode('playground-code', 'playground-output')">▶ Run Code</button>
+                <div id="playground-output" class="output">Your output will appear here!</div>
+                
+                <div class="challenge">
+                    <h4>🌟 Playground Challenges!</h4>
+                    <p>Try these fun projects:</p>
+                    <ul style="margin-left: 20px;">
+                        <li>Create a birthday card with ASCII art</li>
+                        <li>Make a simple quiz game</li>
+                        <li>Draw different shapes with loops</li>
+                        <li>Build a story with multiple endings</li>
+                        <li>Create a pattern generator</li>
+                    </ul>
+                </div>
+                
+                <div class="pair-activity">
+                    <h4>👥 Code & Share!</h4>
+                    <p>Work with a friend to create something amazing!</p>
+                    <p>Take turns adding lines of code to build something together!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="certificates" class="content" style="display: none;">
+            <h2>🏆 Congratulations!</h2>
+            <div class="lesson" style="text-align: center;">
+                <h3>You've Completed Python Adventure!</h3>
+                <p style="font-size: 1.3em; margin: 20px 0;">
+                    Amazing job! You've learned so much in just 3 days! Here's what you accomplished:
+                </p>
+                
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; margin: 30px 0;">
+                    <div class="badge">Print Master 🖨️</div>
+                    <div class="badge">Art Creator 🎨</div>
+                    <div class="badge">Variable Expert 📦</div>
+                    <div class="badge">Math Wizard 🔢</div>
+                    <div class="badge">Decision Maker 🤔</div>
+                    <div class="badge">Loop Champion 🔄</div>
+                    <div class="badge">List Manager 📝</div>
+                    <div class="badge">Function Builder 🛠️</div>
+                    <div class="badge">Game Creator 🎮</div>
+                    <div class="badge">Story Teller 📚</div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress" style="width: 100%;">100% Complete!</div>
+                </div>
+                
+                <h3 style="margin-top: 40px;">🎓 Your Certificate</h3>
+                <div style="background: white; border: 5px solid gold; border-radius: 15px; padding: 40px; margin: 20px auto; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                    <h2 style="color: #667eea; font-size: 2.5em; margin-bottom: 20px;">Certificate of Achievement</h2>
+                    <p style="font-size: 1.3em; color: #333; margin: 20px 0;">This certifies that</p>
+                    <p style="font-size: 2em; color: #764ba2; font-weight: bold; margin: 20px 0;">[Your Name]</p>
+                    <p style="font-size: 1.3em; color: #333; margin: 20px 0;">
+                        has successfully completed the<br>
+                        <strong>Python Adventure 3-Day Course</strong>
+                    </p>
+                    <p style="font-size: 1.1em; color: #666; margin: 10px 0;">
+                        Skills Earned: Basic Python Programming<br>
+                        Projects Completed: 12<br>
+                        Date: <span id="cert-date"></span>
+                    </p>
+                    <p style="font-size: 1.2em; color: #666; margin-top: 30px;">Keep coding and creating amazing things! 🚀</p>
+                </div>
+                
+                <h3 style="margin-top: 40px;">🎨 Your Printable Achievements!</h3>
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin: 20px 0;">
+                    <p style="font-size: 1.2em; margin-bottom: 20px;">Print and collect these stickers!</p>
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+                        <div class="sticker-reward sticker-star"></div>
+                        <div class="sticker-reward sticker-rocket"></div>
+                        <div class="sticker-reward sticker-trophy"></div>
+                    </div>
+                    <p style="margin-top: 20px;">✂️ Cut out and stick on your coding journal!</p>
+                </div>
+                
+                <div class="tip" style="margin-top: 40px;">
+                    <strong>What's Next?</strong><br>
+                    • Keep practicing in the Playground!<br>
+                    • Try modifying the games you created<br>
+                    • Combine different concepts to make new projects<br>
+                    • Teach a friend what you learned<br>
+                    • Join online Python communities for kids<br>
+                    • The sky's the limit! 🌟
+                </div>
+                
+                <script>
+                    // Set certificate date
+                    document.getElementById('cert-date').textContent = new Date().toLocaleDateString();
+                </script>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Theme Selector -->
+    <div class="theme-selector">
+        <p style="margin: 0 0 10px 0; font-size: 12px;">Choose your theme:</p>
+        <button class="theme-btn theme-purple" onclick="setTheme('purple')" title="Purple"></button>
+        <button class="theme-btn theme-blue" onclick="setTheme('blue')" title="Blue"></button>
+        <button class="theme-btn theme-green" onclick="setTheme('green')" title="Green"></button>
+        <button class="theme-btn theme-orange" onclick="setTheme('orange')" title="Orange"></button>
+    </div>
+</body>
+</html>
